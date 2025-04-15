@@ -1,4 +1,7 @@
 import 'dart:convert';
+
+import 'package:dashhit/common/constants/enums.dart';
+import 'package:dashhit/common/widgets/flush.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -10,6 +13,7 @@ class DataProvider with ChangeNotifier {
   List<int> _pageViewHistory = List.generate(10, (index) => 0);
   bool _useWebSocket = true;
   late WebSocketChannel _channel;
+  SwitchType currentSwitch = SwitchType.socket;
 
   DataProvider() {
     if (_useWebSocket) {
@@ -33,6 +37,7 @@ class DataProvider with ChangeNotifier {
     _channel.stream.listen((data) {
       _updateData(json.decode(data));
     });
+    currentSwitch = SwitchType.socket;
   }
 
   void _startPolling() {
@@ -42,6 +47,7 @@ class DataProvider with ChangeNotifier {
         await _fetchData();
       }
     });
+    currentSwitch = SwitchType.polling;
   }
 
   Future<void> _fetchData() async {
@@ -57,19 +63,26 @@ class DataProvider with ChangeNotifier {
     _pageViews = data['pageViews'];
     _avgSessionDuration = data['avgSessionDuration'];
 
-    // Update history (keep last 10 values)
     _pageViewHistory = [..._pageViewHistory.sublist(1), _pageViews];
 
     notifyListeners();
   }
 
-  void toggleConnectionMethod() {
+  void toggleConnectionMethod(BuildContext context) {
     _useWebSocket = !_useWebSocket;
     if (_useWebSocket) {
       _initWebSocket();
+      Flush(
+        title: "Web Socket",
+        message: "Web Socket connected successfully!",
+      ).build(context);
     } else {
       _channel.sink.close();
       _startPolling();
+      Flush(
+        title: "Polling",
+        message: "Polling service connected successfully!",
+      ).build(context);
     }
     notifyListeners();
   }

@@ -1,0 +1,1 @@
+enum SwitchType {socket, polling}

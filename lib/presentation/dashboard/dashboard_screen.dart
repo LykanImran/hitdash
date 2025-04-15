@@ -1,3 +1,6 @@
+import 'package:animated_toggle_switch/animated_toggle_switch.dart';
+import 'package:dashhit/common/constants/enums.dart';
+import 'package:dashhit/common/constants/image_constants.dart';
 import 'package:dashhit/common/widgets/metric_card.dart';
 import 'package:dashhit/common/widgets/page_view_chart.dart';
 import 'package:dashhit/common/widgets/session_gauge.dart';
@@ -12,17 +15,46 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         title: const Text('HitDash'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.swap_horiz),
-            onPressed: () {
-              Provider.of<DataProvider>(context, listen: false)
-                  .toggleConnectionMethod();
-            },
-            tooltip:
-                'Switch to ${Provider.of<DataProvider>(context, listen: false).useWebSocket ? 'Polling' : 'WebSocket'}',
-          ),
+          Consumer<DataProvider>(builder: (context, data, child) {
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+              child: AnimatedToggleSwitch<SwitchType>.dual(
+                current: data.currentSwitch,
+                first: SwitchType.socket,
+                second: SwitchType.polling,
+                spacing: 50.0,
+                style: const ToggleStyle(
+                  borderColor: Colors.transparent,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      spreadRadius: 1,
+                      blurRadius: 2,
+                      offset: Offset(0, 1.5),
+                    ),
+                  ],
+                ),
+                borderWidth: 5.0,
+                height: 50,
+                onChanged: (value) {
+                  Provider.of<DataProvider>(context, listen: false)
+                      .toggleConnectionMethod(context);
+                },
+                styleBuilder: (v) => ToggleStyle(
+                    indicatorColor:
+                        v == SwitchType.socket ? Colors.blue : Colors.green),
+                iconBuilder: (value) => value == SwitchType.socket
+                    ? const Icon(Icons.webhook)
+                    : const Icon(Icons.bolt),
+                textBuilder: (value) => value == SwitchType.socket
+                    ? const Center(child: Text('Web Socket'))
+                    : const Center(child: Text('Polling')),
+              ),
+            );
+          }),
         ],
       ),
       body: Padding(
@@ -37,14 +69,14 @@ class DashboardScreen extends StatelessWidget {
                   title: 'Active Users',
                   value:
                       Provider.of<DataProvider>(context).activeUsers.toString(),
-                  icon: Icons.people,
+                  image: ImageConstants.user,
                   color: Colors.blue,
                 ),
                 MetricCard(
                   title: 'Page Views',
                   value:
                       Provider.of<DataProvider>(context).pageViews.toString(),
-                  icon: Icons.remove_red_eye,
+                  image: ImageConstants.eyeVisibility,
                   color: Colors.green,
                 ),
               ],

@@ -1,3 +1,4 @@
+import 'package:dashhit/common/style/app_style.dart';
 import 'package:dashhit/presentation/dashboard/dashboard_screen.dart';
 import 'package:dashhit/provider/data_provider.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'HitDash',
       theme: ThemeData(
+        cardColor: AppStyle.surface,
+        scaffoldBackgroundColor: AppStyle.backgroundLight,
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
